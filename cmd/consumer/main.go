@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github/shipment-auth-notification/internal/config"
 	"github/shipment-auth-notification/internal/model"
 	"log"
 
@@ -11,10 +12,15 @@ import (
 )
 
 func main() {
+	cfg, err := config.Load("conf/local.properties")
+	if err != nil {
+		log.Fatalf("Error de configuración: %v", err)
+	}
+
 	client, err := kgo.NewClient(
-		kgo.SeedBrokers("localhost:9092"),
-		kgo.ConsumeTopics("authorizations"),
-		kgo.ConsumerGroup("notification-service-group"),
+		kgo.SeedBrokers(cfg.KafkaBrokers...),
+		kgo.ConsumeTopics(cfg.KafkaTopic),
+		kgo.ConsumerGroup(cfg.KafkaConsumerGroup),
 	)
 	if err != nil {
 		log.Fatalf("Error de conexión: %v", err)

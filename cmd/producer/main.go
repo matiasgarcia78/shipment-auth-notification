@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github/shipment-auth-notification/internal/config"
 	"github/shipment-auth-notification/internal/model"
 	"log"
 	"math/rand"
@@ -15,9 +16,14 @@ import (
 var statuses = []string{model.AUTHORIZED, model.CANCELLED}
 
 func main() {
+	cfg, err := config.Load("conf/local.properties")
+	if err != nil {
+		log.Fatalf("Error de configuración: %v", err)
+	}
+
 	client, err := kgo.NewClient(
-		kgo.SeedBrokers("localhost:9092"),
-		kgo.DefaultProduceTopic("authorizations"),
+		kgo.SeedBrokers(cfg.KafkaBrokers...),
+		kgo.DefaultProduceTopic(cfg.KafkaTopic),
 	)
 	if err != nil {
 		log.Fatalf("Error de conexión: %v", err)
